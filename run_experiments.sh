@@ -4,7 +4,7 @@ set -e
 # --- Configuration ---
 IMAGE_NAME="compression-test-env"
 TIMESTAMP=$(date +'%Y-%m-%d_%H-%M-%S')
-OUTPUT_DIR="output_${TIMESTAMP}"
+OUTPUT_DIR="output/${TIMESTAMP}"
 
 # --- Script Logic ---
 echo "--- Compression Benchmark Runner ---"

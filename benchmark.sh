@@ -12,6 +12,7 @@ OUTPUT_DIR="/output"
 OUTPUT_FILE="${OUTPUT_DIR}/benchmark_results_${TIMESTAMP}.csv"
 LOGS_DIR="${OUTPUT_DIR}/logs_${TIMESTAMP}"
 PERF_EVENTS="task-clock,context-switches,cpu-migrations,page-faults,cycles,instructions,branches,branch-misses"
+GENERATOR_SCRIPT="markov_text_generator.py"
 
 # --- SCRIPT SETUP ---
 
@@ -48,9 +49,10 @@ stop_monitors() {
 # --- MAIN LOGIC ---
 
 for size in "${SIZES_MB[@]}"; do
-  FILENAME="testfile_${size}M.bin"
+  FILENAME="testfile_${size}M.txt"
   echo "--- Generating master test file: ${FILENAME} ---"
-  dd if=/dev/urandom of=$FILENAME bs=1M count=$size status=progress
+
+  python $GENERATOR_SCRIPT $size > $FILENAME
   ORIGINAL_SIZE=$(stat -c%s "$FILENAME")
 
   for algo in "${ALGOS[@]}"; do
