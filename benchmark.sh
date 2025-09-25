@@ -52,7 +52,7 @@ for size in "${SIZES_MB[@]}"; do
   FILENAME="testfile_${size}M.txt"
   echo "--- Generating master test file: ${FILENAME} ---"
 
-  python $GENERATOR_SCRIPT $size > $FILENAME
+  python3 $GENERATOR_SCRIPT $size > $FILENAME
   ORIGINAL_SIZE=$(stat -c%s "$FILENAME")
 
   for algo in "${ALGOS[@]}"; do

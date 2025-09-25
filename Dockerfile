@@ -15,7 +15,7 @@ RUN apt-get update \
 
 WORKDIR /app
 
-COPY a_tale_of_two_cities.txt markov_text_generator.py run_generator.py ./
+COPY a_tale_of_two_cities.txt markov_text_generator.py markov_text_generator.py ./
 
 # Copy the benchmark script into the image's executable path
 COPY benchmark.sh /usr/local/bin/benchmark.sh
