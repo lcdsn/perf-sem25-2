@@ -1,0 +1,1 @@
+algorithm,size_mb,run,compression_time_ms,decompression_time_ms,original_size_b,compressed_size_b,compression_ratio_pct,comp_cycles,comp_instructions,comp_branch_misses,decomp_cycles,decomp_instructions,decomp_branch_misses
