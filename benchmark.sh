@@ -96,6 +96,8 @@ for size in "${SIZES_MB[@]}"; do
 
       # 4. --- CLEAN UP FOR NEXT RUN ---
       rm $COMPRESSED_FILENAME
+
+      sleep 10
     done
   done
   rm $FILENAME
