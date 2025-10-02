@@ -1,0 +1,4 @@
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 2  0  90112 2566988   1800 444736    0    1   352   112  181  118  8  1 91  0  0
+ 2  0  90112 2566988   1800 444736    0    0 48632     0 1909  725 22  2 73  2  0
