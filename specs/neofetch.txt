@@ -1,0 +1,17 @@
+lucas@ubuntu22-04 
+----------------- 
+OS: Ubuntu 22.04.5 LTS x86_64 
+Host: Inspiron 3584 
+Kernel: 6.8.0-85-generic 
+Uptime: 23 hours, 57 mins 
+Packages: 3163 (dpkg), 4 (guix-user), 17 (flatpak), 17 (snap) 
+Shell: zsh 5.8.1 
+Resolution: 1366x768 
+WM: i3 
+Theme: Yaru-dark [GTK3] 
+Icons: Yaru [GTK3] 
+Terminal: tmux 
+CPU: Intel i3-7020U (4) @ 2.300GHz 
+GPU: Intel Device 5921 
+Memory: 1814MiB / 3816MiB 
+
