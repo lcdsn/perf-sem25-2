@@ -1,0 +1,23 @@
+# started on Thu Nov 20 20:57:42 2025
+
+
+ Performance counter stats for 'bash -c bzip2 -f -k "files/testfile_14M.txt"':
+
+        4276312577      cycles                           #    2.293 GHz                    
+        4991140088      instructions                     #    1.17  insn per cycle         
+         724751318      branches                         #  388.621 M/sec                  
+          76376972      branch-misses                    #   10.54% of all branches        
+          18535079      cache-misses                                                       
+                 5      context-switches                 #    2.681 /sec                   
+              1808      minor-faults                     #  969.474 /sec                   
+                 0      major-faults                     #    0.000 /sec                   
+           1864.93 msec task-clock                       #    1.000 CPUs utilized          
+              3593      syscalls:sys_enter_read          #    1.927 K/sec                  
+               775      syscalls:sys_enter_write         #  415.565 /sec                   
+
+       1.865429054 seconds time elapsed
+
+       1.845628000 seconds user
+       0.020006000 seconds sys
+
+

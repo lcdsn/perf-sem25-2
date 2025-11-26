@@ -1,0 +1,23 @@
+# started on Thu Nov 20 19:41:05 2025
+
+
+ Performance counter stats for 'bash -c xz -f -k "files/testfile_18M.txt"':
+
+       35324642213      cycles                           #    2.289 GHz                    
+       35169402724      instructions                     #    1.00  insn per cycle         
+        4738697424      branches                         #  307.107 M/sec                  
+         369593881      branch-misses                    #    7.80% of all branches        
+         426277930      cache-misses                                                       
+                93      context-switches                 #    6.027 /sec                   
+             27869      minor-faults                     #    1.806 K/sec                  
+                 0      major-faults                     #    0.000 /sec                   
+          15430.14 msec task-clock                       #    1.000 CPUs utilized          
+              2313      syscalls:sys_enter_read          #  149.901 /sec                   
+               241      syscalls:sys_enter_write         #   15.619 /sec                   
+
+      15.433830537 seconds time elapsed
+
+      15.292647000 seconds user
+       0.137969000 seconds sys
+
+

@@ -1,0 +1,23 @@
+# started on Thu Nov 20 21:43:37 2025
+
+
+ Performance counter stats for 'bash -c xz -d -c "files/testfile_9M.txt.xz" > /dev/null':
+
+         205926938      cycles                           #    2.294 GHz                    
+         256277377      instructions                     #    1.24  insn per cycle         
+          38827428      branches                         #  432.447 M/sec                  
+           3199586      branch-misses                    #    8.24% of all branches        
+            716121      cache-misses                                                       
+                 2      context-switches                 #   22.275 /sec                   
+              2317      minor-faults                     #   25.806 K/sec                  
+                 0      major-faults                     #    0.000 /sec                   
+             89.79 msec task-clock                       #    0.993 CPUs utilized          
+               140      syscalls:sys_enter_read          #    1.559 K/sec                  
+              1153      syscalls:sys_enter_write         #   12.842 K/sec                  
+
+       0.090440559 seconds time elapsed
+
+       0.080007000 seconds user
+       0.010558000 seconds sys
+
+

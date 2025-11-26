@@ -1,0 +1,23 @@
+# started on Thu Nov 20 21:20:41 2025
+
+
+ Performance counter stats for 'bash -c gzip -f -k "files/testfile_22M.txt"':
+
+        5465635035      cycles                           #    2.294 GHz                    
+        5678807090      instructions                     #    1.04  insn per cycle         
+        1241720241      branches                         #  521.204 M/sec                  
+          59002798      branch-misses                    #    4.75% of all branches        
+           1150801      cache-misses                                                       
+                72      context-switches                 #   30.222 /sec                   
+               318      minor-faults                     #  133.478 /sec                   
+                 0      major-faults                     #    0.000 /sec                   
+           2382.41 msec task-clock                       #    0.997 CPUs utilized          
+               711      syscalls:sys_enter_read          #  298.438 /sec                   
+                33      syscalls:sys_enter_write         #   13.852 /sec                   
+
+       2.388843966 seconds time elapsed
+
+       2.374079000 seconds user
+       0.009000000 seconds sys
+
+

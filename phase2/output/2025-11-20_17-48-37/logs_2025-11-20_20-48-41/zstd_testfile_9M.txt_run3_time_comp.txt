@@ -1,0 +1,24 @@
+files/testfile_9M.txt : 23.97%   (  9.00 MiB =>   2.16 MiB, files/testfile_9M.txt.zst) 
+	Command being timed: "bash -c zstd -f -k "files/testfile_9M.txt" -o "files/testfile_9M.txt.zst""
+	User time (seconds): 0.09
+	System time (seconds): 0.01
+	Percent of CPU this job got: 107%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.10
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 15488
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 3536
+	Voluntary context switches: 121
+	Involuntary context switches: 1
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 4432
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

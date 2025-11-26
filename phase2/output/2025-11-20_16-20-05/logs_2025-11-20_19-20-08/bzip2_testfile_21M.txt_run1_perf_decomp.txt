@@ -1,0 +1,23 @@
+# started on Thu Nov 20 19:49:40 2025
+
+
+ Performance counter stats for 'bash -c bzip2 -d -c "files/testfile_21M.txt.bz2" > /dev/null':
+
+        3337265012      cycles                           #    2.292 GHz                    
+        2517877725      instructions                     #    0.75  insn per cycle         
+         467949388      branches                         #  321.409 M/sec                  
+          25619011      branch-misses                    #    5.47% of all branches        
+          23144589      cache-misses                                                       
+                 7      context-switches                 #    4.808 /sec                   
+              1150      minor-faults                     #  789.873 /sec                   
+                 0      major-faults                     #    0.000 /sec                   
+           1455.93 msec task-clock                       #    0.999 CPUs utilized          
+              1169      syscalls:sys_enter_read          #  802.923 /sec                   
+              5377      syscalls:sys_enter_write         #    3.693 K/sec                  
+
+       1.456691972 seconds time elapsed
+
+       1.443136000 seconds user
+       0.013683000 seconds sys
+
+

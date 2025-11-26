@@ -1,0 +1,23 @@
+# started on Thu Nov 20 21:26:12 2025
+
+
+ Performance counter stats for 'bash -c zstd -f -k "files/testfile_23M.txt" -o "files/testfile_23M.txt.zst"':
+
+         616233735      cycles                           #    2.269 GHz                    
+         811519790      instructions                     #    1.32  insn per cycle         
+         113981441      branches                         #  419.653 M/sec                  
+           3061087      branch-misses                    #    2.69% of all branches        
+           6082452      cache-misses                                                       
+               291      context-switches                 #    1.071 K/sec                  
+              7549      minor-faults                     #   27.794 K/sec                  
+                 0      major-faults                     #    0.000 /sec                   
+            271.61 msec task-clock                       #    1.133 CPUs utilized          
+               195      syscalls:sys_enter_read          #  717.945 /sec                   
+                93      syscalls:sys_enter_write         #  342.404 /sec                   
+
+       0.239622007 seconds time elapsed
+
+       0.230347000 seconds user
+       0.042878000 seconds sys
+
+
