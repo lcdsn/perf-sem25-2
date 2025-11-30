@@ -1,0 +1,372 @@
+%%
+%% Análise Comparativa de Algoritmos de Compressão de Arquivos
+%% Baseado no template ACM Small
+%%
+\documentclass[acmsmall]{acmart}
+
+%% Pacotes adicionais
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+
+%% Configuração de listings para pseudo-código
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  language=Python
+}
+
+%%
+%% These commands are for a JOURNAL article.
+\acmJournal{INF01146}
+\acmVolume{2025}
+\acmNumber{1}
+\acmArticle{1}
+\acmMonth{12}
+\acmYear{2025}
+
+%% Remover informações desnecessárias
+\setcopyright{none}
+\settopmatter{printfolios=true, printacmref=false}
+\authorsaddresses{}
+
+\makeatletter
+\def\@formatdoi#1{}
+\renewcommand\footnotetextcopyrightpermission[1]{}
+\makeatother
+
+\begin{document}
+
+%%
+%% Título
+%%
+\title{Análise Comparativa de Algoritmos de Compressão de Arquivos}
+
+%%
+%% Autores
+%%
+\author{Lucas Soller}
+\affiliation{%
+  \institution{Universidade Federal do Rio Grande do Sul}
+  \city{Porto Alegre}
+  \state{RS}
+  \country{Brasil}
+}
+
+\author{Lucas Nogueira}
+\affiliation{%
+  \institution{Universidade Federal do Rio Grande do Sul}
+  \city{Porto Alegre}
+  \state{RS}
+  \country{Brasil}
+}
+
+\renewcommand{\shortauthors}{Soller \& Nogueira}
+
+%%
+%% Resumo
+%%
+\begin{abstract}
+Este trabalho apresenta uma análise comparativa de desempenho de quatro algoritmos de compressão de arquivos amplamente utilizados: gzip, bzip2, xz e zstd. Utilizando medições em ambiente real com containerização Docker para garantir reprodutibilidade, avaliamos métricas como tempo de compressão, tempo de descompressão e taxa de compressão. Os experimentos foram conduzidos com arquivos de texto gerados através de Cadeias de Markov, em tamanhos de 10MB, 100MB e 1000MB. Os resultados demonstram os trade-offs entre velocidade e eficiência de compressão, fornecendo insights práticos para a escolha do algoritmo mais adequado em diferentes cenários de uso.
+\end{abstract}
+
+%%
+%% Palavras-chave
+%%
+\keywords{compressão de arquivos, análise de desempenho, gzip, bzip2, xz, zstd, benchmarking}
+
+\maketitle
+
+%%
+%% 1. Introdução
+%%
+\section{Introdução}
+
+A compressão de arquivos é uma tarefa rotineira e fundamental no ambiente de desenvolvimento de software, administração de sistemas e ciência de dados. Com o crescimento exponencial do volume de dados gerados e armazenados, a escolha do algoritmo de compressão adequado torna-se cada vez mais crítica para otimizar espaço de armazenamento e transferência de dados em redes.
+
+Este trabalho tem como objetivo analisar comparativamente quatro das ferramentas de compressão mais utilizadas em sistemas Unix-like: \textbf{gzip}, \textbf{bzip2}, \textbf{xz} e \textbf{zstd}. Cada uma dessas ferramentas implementa algoritmos distintos com características próprias de desempenho e eficiência.
+
+A escolha deste objeto de estudo baseia-se na relevância prática do tema e na vivência do grupo. Compreender os \textit{trade-offs} entre os diferentes algoritmos é crucial para tomar decisões informadas sobre qual ferramenta utilizar em cenários específicos, como backup de dados, distribuição de pacotes de software ou otimização de largura de banda em redes.
+
+%%
+%% 2. Fundamentação Teórica
+%%
+\section{Fundamentação Teórica}
+
+Nesta seção, descrevemos brevemente os algoritmos subjacentes a cada uma das ferramentas de compressão analisadas.
+
+\subsection{gzip (DEFLATE)}
+
+O gzip~\cite{gzip} é baseado no algoritmo DEFLATE, que combina o algoritmo LZ77 (Lempel-Ziv 1977) com codificação Huffman. É amplamente utilizado devido à sua alta velocidade de compressão e descompressão, embora ofereça uma taxa de compressão moderada em comparação com algoritmos mais recentes.
+
+\subsection{bzip2 (Burrows-Wheeler)}
+
+O bzip2~\cite{bzip2} utiliza a transformada de Burrows-Wheeler (BWT) seguida de codificação Move-to-Front e codificação Huffman. Este processo resulta em taxas de compressão superiores ao gzip, porém com maior tempo de processamento, especialmente na descompressão.
+
+\subsection{xz (LZMA2)}
+
+O xz~\cite{xz} é baseado no algoritmo LZMA2 (Lempel-Ziv-Markov chain Algorithm), que oferece as maiores taxas de compressão entre os quatro algoritmos analisados. No entanto, isso vem com o custo de tempos de processamento significativamente mais longos, tanto para compressão quanto para descompressão.
+
+\subsection{zstd (Zstandard)}
+
+O zstd~\cite{zstd}, desenvolvido pelo Facebook, é um algoritmo moderno que busca equilibrar alta velocidade (comparável ao gzip) com excelente taxa de compressão (competindo com xz). Utiliza uma combinação de técnicas incluindo correspondência de dicionário, codificação de entropia FSE (Finite State Entropy) e oferece níveis de compressão configuráveis.
+
+%%
+%% 3. Metodologia
+%%
+\section{Metodologia}
+
+O método de análise escolhido é a medição em ambiente real. Este método permite a obtenção de dados concretos e reprodutíveis do desempenho de cada algoritmo em condições operacionais típicas.
+
+\subsection{Ambiente Experimental}
+
+Para garantir a reprodutibilidade e isolamento dos testes, foi utilizado Docker. Isso permite que o ambiente de execução seja consistente, independentemente da máquina em que o projeto for executado, eliminando variações causadas por diferentes sistemas operacionais ou versões de pacotes.
+
+\textbf{Configurações do Host:}
+\begin{itemize}
+  \item Sistema Operacional: Ubuntu 22.04.5 LTS x86\_64
+  \item Hardware: Dell Inspiron 3584
+  \item CPU: Intel i3-7020U (4 threads) @ 2.300GHz
+  \item RAM: 4 GB
+\end{itemize}
+
+\textbf{Imagem Docker:} debian:bookworm-slim com os seguintes pacotes:
+\begin{itemize}
+  \item bzip2=1.0.8-5+b1
+  \item gzip=1.12-1
+  \item xz-utils=5.4.1-1
+  \item zstd=1.5.4+dfsg2-5
+  \item sysstat=12.6.1-1 (iostat)
+  \item procps=2:4.0.2-3 (vmstat)
+  \item linux-perf=6.1.153-1
+\end{itemize}
+
+\subsection{Ferramentas de Instrumentação}
+
+\begin{description}
+  \item[perf] Ferramenta avançada para profiling de desempenho~\cite{perf} que permite coletar dados detalhados sobre a atividade da CPU, como cache misses, instruções executadas e ciclos de CPU. Foi utilizado \texttt{perf stat} para obter estatísticas resumidas.
+
+  \item[iostat] Ferramenta para monitorar a atividade de E/S do sistema (leitura/escrita em disco). Essencial para entender o impacto dos algoritmos nos discos.
+
+  \item[vmstat] Ferramenta para monitorar a memória virtual. Útil para entender o uso de memória durante a compressão e descompressão de arquivos grandes.
+
+  \item[Scripts Bash] Para automatizar a execução de múltiplas rodadas de testes e a coleta de dados, garantindo a consistência dos experimentos.
+\end{description}
+
+\subsection{Geração dos Dados de Teste}
+
+Para garantir a aleatoriedade e generalidade dos resultados, os arquivos de teste não são fixos, mas gerados aleatoriamente utilizando o algoritmo de Cadeias de Markov, conforme descrito por Kernighan e Pike~\cite{kernighan1999practice}.
+
+Na implementação, foi utilizado um arquivo base (``A Tale of Two Cities'') para treinar o modelo de Markov, e o tamanho do arquivo final foi especificado em MB. Este método garante que os testes simulem a compressão de dados textuais realistas, sem padrões artificiais que possam favorecer ou prejudicar um algoritmo específico.
+
+Os tamanhos de arquivo utilizados foram: 10MB, 100MB e 1000MB.
+
+\subsection{Procedimento Experimental}
+
+O procedimento de benchmark segue os seguintes passos para cada tamanho de arquivo:
+
+\begin{enumerate}
+  \item \textbf{Geração do arquivo de teste:} Um arquivo de texto é gerado utilizando o gerador de Cadeias de Markov com o tamanho especificado.
+
+  \item \textbf{Para cada algoritmo (gzip, bzip2, xz, zstd):}
+  \begin{enumerate}
+    \item Para cada repetição (3 execuções):
+    \begin{enumerate}
+      \item Limpar o cache de páginas do sistema: \texttt{sync \&\& echo 3 > /proc/sys/vm/drop\_caches}
+      \item Iniciar monitoramento com vmstat e iostat
+      \item Executar compressão com \texttt{perf stat} para coletar métricas de hardware
+      \item Medir tamanho do arquivo comprimido
+      \item Limpar cache novamente
+      \item Executar descompressão com \texttt{perf stat}
+      \item Salvar resultados em arquivo CSV
+      \item Aguardar 10 segundos (cooldown)
+    \end{enumerate}
+  \end{enumerate}
+\end{enumerate}
+
+Os eventos de hardware coletados pelo perf incluem: task-clock, context-switches, cpu-migrations, page-faults, cycles, instructions, branches e branch-misses.
+
+\subsection{Métricas Coletadas}
+
+\begin{description}
+  \item[Tempo de Compressão] O tempo total (task-clock em ms) que cada ferramenta leva para compactar um arquivo.
+
+  \item[Tempo de Descompressão] O tempo que cada ferramenta leva para descompactar o arquivo gerado.
+
+  \item[Taxa de Compressão] Calculada pela fórmula: $\frac{\text{Tamanho comprimido}}{\text{Tamanho original}} \times 100$. Valores menores indicam maior eficiência.
+
+  \item[Ciclos de CPU] Número total de ciclos de processador utilizados.
+
+  \item[Instruções Executadas] Número de instruções de máquina executadas.
+
+  \item[Branch Misses] Número de predições de branch incorretas, indicando a complexidade do fluxo de controle do algoritmo.
+\end{description}
+
+%%
+%% 4. Resultados
+%%
+\section{Resultados}
+
+Esta seção apresenta os resultados obtidos nos experimentos, divididos em duas fases de análise.
+
+\subsection{Resultados da Fase 2}
+
+Na segunda fase do projeto, foram realizados 3 experimentos para cada um dos quatro algoritmos, utilizando arquivos de texto de 10MB, 100MB e 1000MB. Nesta etapa, um novo arquivo de texto era gerado para cada experimento.
+
+A Figura~\ref{fig:phase2_10mb} apresenta os resultados para arquivos de 10MB.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image1}
+  \caption{Desempenho dos algoritmos com arquivos de 10MB: tempo de compressão, descompressão e taxa de compressão.}
+  \Description{Gráfico comparativo mostrando tempo de compressão, descompressão e taxa de compressão para arquivos de 10MB.}
+  \label{fig:phase2_10mb}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image2}
+  \caption{Desempenho dos algoritmos com arquivos de 100MB.}
+  \Description{Gráfico comparativo para arquivos de 100MB.}
+  \label{fig:phase2_100mb}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image3}
+  \caption{Desempenho dos algoritmos com arquivos de 1000MB.}
+  \Description{Gráfico comparativo para arquivos de 1000MB.}
+  \label{fig:phase2_1000mb}
+\end{figure}
+
+\textbf{Observações da Fase 2:}
+\begin{itemize}
+  \item O algoritmo XZ apresenta o maior tempo de compressão entre todos os algoritmos.
+  \item O algoritmo BZIP2 apresenta o maior tempo de descompressão.
+  \item Nesta etapa, a métrica de taxa de compressão estava invertida (quanto maior, pior). Isso foi corrigido na fase seguinte.
+  \item Com quase 40\% de taxa, o GZIP possui o pior desempenho em eficiência de compressão, ou seja, 40\% do tamanho original não foi comprimido. O XZ apresentou apenas 10\% do tamanho original não comprimido.
+\end{itemize}
+
+\subsection{Resultados da Fase 3}
+
+Após a análise da Fase 2, foi identificado que gerar os arquivos de texto apenas uma vez seria a melhor abordagem metodológica. Os gráficos a seguir apresentam os resultados refinados da Fase 3.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image4}
+  \caption{Tempo de compressão por algoritmo na Fase 3.}
+  \Description{Gráfico de barras mostrando tempo de compressão para cada algoritmo.}
+  \label{fig:comp_time}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image5}
+  \caption{Tempo de descompressão por algoritmo na Fase 3.}
+  \Description{Gráfico de barras mostrando tempo de descompressão para cada algoritmo.}
+  \label{fig:decomp_time}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image6}
+  \caption{Taxa de compressão por algoritmo na Fase 3.}
+  \Description{Gráfico de barras mostrando taxa de compressão para cada algoritmo.}
+  \label{fig:comp_rate}
+\end{figure}
+
+\subsubsection{Análise de Regressão}
+
+Para melhor compreensão do comportamento dos algoritmos com diferentes tamanhos de arquivo, foram realizadas análises de regressão.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image7}
+  \caption{Regressão do tempo de compressão em função do tamanho do arquivo.}
+  \Description{Gráfico de regressão linear do tempo de compressão.}
+  \label{fig:reg_comp}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image8}
+  \caption{Regressão do tempo de descompressão em função do tamanho do arquivo.}
+  \Description{Gráfico de regressão linear do tempo de descompressão.}
+  \label{fig:reg_decomp}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image9}
+  \caption{Regressão da taxa de compressão em função do tamanho do arquivo.}
+  \Description{Gráfico de regressão da taxa de compressão.}
+  \label{fig:reg_comp_rate}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image10}
+  \caption{Análise adicional de desempenho.}
+  \Description{Gráfico adicional de análise de desempenho.}
+  \label{fig:additional1}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image11}
+  \caption{Comparação de métricas de hardware.}
+  \Description{Gráfico comparativo de métricas de hardware.}
+  \label{fig:additional2}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image12}
+  \caption{Análise consolidada dos resultados.}
+  \Description{Gráfico consolidado dos resultados finais.}
+  \label{fig:additional3}
+\end{figure}
+
+%%
+%% 5. Discussão
+%%
+\section{Discussão}
+
+Os resultados obtidos confirmam os trade-offs conhecidos entre os algoritmos de compressão:
+
+\textbf{gzip} oferece o melhor equilíbrio entre velocidade e simplicidade, sendo ideal para cenários onde o tempo de processamento é crítico e a taxa de compressão moderada é aceitável.
+
+\textbf{bzip2} apresenta melhor taxa de compressão que o gzip, mas com penalidade significativa no tempo de descompressão. É adequado para arquivamento de longo prazo onde a descompressão é infrequente.
+
+\textbf{xz} oferece as melhores taxas de compressão, mas com os maiores tempos de processamento. Recomendado para distribuição de software e arquivos que serão descomprimidos muitas vezes após uma única compressão.
+
+\textbf{zstd} demonstra ser uma alternativa moderna e versátil, oferecendo velocidades comparáveis ao gzip com taxas de compressão próximas ao xz. É particularmente adequado para aplicações em tempo real e streaming de dados.
+
+%%
+%% 6. Conclusão
+%%
+\section{Conclusão}
+
+Este trabalho apresentou uma análise comparativa detalhada de quatro algoritmos de compressão de arquivos: gzip, bzip2, xz e zstd. Através de experimentos controlados em ambiente Docker, foram coletadas métricas de tempo de compressão, descompressão e taxa de compressão para arquivos de diferentes tamanhos.
+
+Os resultados demonstram que não existe um algoritmo universalmente superior, mas sim diferentes trade-offs que devem ser considerados conforme o caso de uso específico:
+
+\begin{itemize}
+  \item Para velocidade máxima: gzip ou zstd
+  \item Para melhor compressão: xz
+  \item Para equilíbrio moderno: zstd
+\end{itemize}
+
+Como trabalhos futuros, sugerimos a análise com diferentes tipos de arquivos (binários, imagens, dados científicos).
+
+%%
+%% Referências
+%%
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}
