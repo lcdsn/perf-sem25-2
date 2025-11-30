@@ -208,22 +208,37 @@ Os eventos de hardware coletados pelo perf incluem: task-clock, context-switches
 
 \subsection{Reprodução dos Experimentos}
 
-O projeto contém dois experimentos distintos:
+O projeto está organizado em duas fases distintas, cada uma com metodologia e estrutura próprias.
 
-\textbf{Fase 2:} Para reproduzir os experimentos da Fase 2, execute na raiz do projeto:
+\textbf{Pré-requisitos:}
+\begin{itemize}
+  \item Docker instalado e em execução
+  \item Permissões para executar containers privilegiados (necessário para \texttt{perf})
+\end{itemize}
 
+\textbf{Fase 2} (arquivos de 10MB, 100MB e 1000MB):
 \begin{verbatim}
+  cd phase2
   ./run_experiments.sh
 \end{verbatim}
 
-\textbf{Fase 3:} Para reproduzir os experimentos da Fase 3, execute no diretório \texttt{phase3/}:
+Nesta fase, para cada tamanho de arquivo e cada repetição, um \textbf{novo arquivo de teste é gerado} utilizando o gerador de Cadeias de Markov. O script compila o gerador (\texttt{markov\_chain.cpp}), gera o arquivo, executa a compressão/descompressão e repete o processo. Isso introduz variabilidade nos dados de teste entre execuções.
 
+\textbf{Fase 3} (arquivos de 1MB a 25MB, metodologia refinada):
 \begin{verbatim}
   cd phase3
   ./run_experiments.sh
 \end{verbatim}
 
-Ambos os scripts irão construir a imagem Docker, executar o container com as permissões necessárias, gerar os arquivos de teste, executar os algoritmos de compressão e salvar os resultados em arquivos CSV no diretório \texttt{output/}.
+Nesta fase, os arquivos de teste foram \textbf{gerados previamente uma única vez} e empacotados em \texttt{files.tar.xz}. O script extrai os arquivos e executa todos os experimentos sobre os mesmos dados, garantindo que as comparações entre algoritmos sejam feitas em condições idênticas. Esta abordagem elimina a variabilidade da geração de dados e permite análises estatísticas mais precisas.
+
+\textbf{Diferenças principais entre as fases:}
+\begin{itemize}
+  \item \textbf{Fase 2:} Geração dinâmica de arquivos a cada experimento; tamanhos grandes (até 1GB); foco em escalabilidade.
+  \item \textbf{Fase 3:} Arquivos pré-gerados e reutilizados; granularidade fina (1-25MB); foco em precisão estatística.
+\end{itemize}
+
+Os notebooks Jupyter (\texttt{graphs\_phase2.ipynb} e \texttt{graphs\_phase3.ipynb}) podem ser utilizados para gerar os gráficos a partir dos dados coletados.
 
 %%
 %% 4. Resultados
@@ -236,11 +251,11 @@ Esta seção apresenta os resultados obtidos nos experimentos, divididos em duas
 
 Na segunda fase do projeto, foram realizados 3 experimentos para cada um dos quatro algoritmos, utilizando arquivos de texto de 10MB, 100MB e 1000MB. Nesta etapa, um novo arquivo de texto era gerado para cada experimento.
 
-A Figura~\ref{fig:phase2_10mb} apresenta os resultados para arquivos de 10MB.
+As Figuras~\ref{fig:phase2_10mb},~\ref{fig:phase2_100mb} e~\ref{fig:phase2_1000mb} apresentam os resultados para arquivos de 10MB, 100MB e 1000MB, respectivamente. Cada gráfico mostra três métricas: tempo de compressão (ms), tempo de descompressão (ms) e taxa de compressão (\%).
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{figures/image1}
+  \includegraphics[width=\linewidth]{figures/image5}
   \caption{Desempenho dos algoritmos com arquivos de 10MB: tempo de compressão, descompressão e taxa de compressão.}
   \Description{Gráfico comparativo mostrando tempo de compressão, descompressão e taxa de compressão para arquivos de 10MB.}
   \label{fig:phase2_10mb}
@@ -272,82 +287,109 @@ A Figura~\ref{fig:phase2_10mb} apresenta os resultados para arquivos de 10MB.
 
 \subsection{Resultados da Fase 3}
 
-Após a análise da Fase 2, foi identificado que gerar os arquivos de texto apenas uma vez seria a melhor abordagem metodológica. Os gráficos a seguir apresentam os resultados refinados da Fase 3.
+Na terceira fase, a metodologia foi refinada para garantir maior rigor científico. As principais mudanças foram:
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{figures/image4}
-  \caption{Tempo de compressão por algoritmo na Fase 3.}
-  \Description{Gráfico de barras mostrando tempo de compressão para cada algoritmo.}
-  \label{fig:comp_time}
-\end{figure}
+\begin{itemize}
+  \item \textbf{Arquivos pré-gerados:} Todos os arquivos de teste (de 1MB a 25MB) foram gerados uma única vez usando Cadeias de Markov e armazenados em \texttt{files.tar.xz}. Os mesmos arquivos são reutilizados em todas as execuções, eliminando a variabilidade da Fase 2.
+  \item \textbf{Preload em cache:} Antes de cada bateria de testes, o arquivo é pré-carregado na memória com \texttt{cat arquivo > /dev/null}, eliminando o efeito de \textit{cold start} e garantindo que as medições reflitam apenas o tempo de processamento do algoritmo, sem interferência de I/O de disco.
+  \item \textbf{Granularidade fina:} Em vez de apenas 3 tamanhos (10, 100, 1000MB), foram utilizados 25 tamanhos diferentes (1MB a 25MB), permitindo análise mais detalhada do comportamento dos algoritmos.
+  \item \textbf{Métricas expandidas:} Além das métricas básicas, foram coletados dados de cache misses, page faults e chamadas de sistema de I/O.
+\end{itemize}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{figures/image5}
-  \caption{Tempo de descompressão por algoritmo na Fase 3.}
-  \Description{Gráfico de barras mostrando tempo de descompressão para cada algoritmo.}
-  \label{fig:decomp_time}
-\end{figure}
+Foram realizadas 3 execuções para cada combinação de algoritmo e tamanho de arquivo, totalizando 300 experimentos (4 algoritmos $\times$ 25 tamanhos $\times$ 3 repetições).
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{figures/image6}
-  \caption{Taxa de compressão por algoritmo na Fase 3.}
-  \Description{Gráfico de barras mostrando taxa de compressão para cada algoritmo.}
-  \label{fig:comp_rate}
-\end{figure}
+\subsubsection{Tempo de Compressão}
 
-\subsubsection{Análise de Regressão}
-
-Para melhor compreensão do comportamento dos algoritmos com diferentes tamanhos de arquivo, foram realizadas análises de regressão.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{figures/image7}
-  \caption{Regressão do tempo de compressão em função do tamanho do arquivo.}
-  \Description{Gráfico de regressão linear do tempo de compressão.}
-  \label{fig:reg_comp}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{figures/image8}
-  \caption{Regressão do tempo de descompressão em função do tamanho do arquivo.}
-  \Description{Gráfico de regressão linear do tempo de descompressão.}
-  \label{fig:reg_decomp}
-\end{figure}
+A Figura~\ref{fig:comp_time} apresenta o tempo de compressão em função do tamanho do arquivo. O algoritmo \textbf{xz} apresenta o maior tempo de compressão, crescendo linearmente de aproximadamente 0,6s para 1MB até 21,5s para 25MB. Em contraste, o \textbf{zstd} mantém tempos extremamente baixos (0,01s a 0,26s), sendo até 80 vezes mais rápido que o xz para arquivos grandes.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{figures/image9}
-  \caption{Regressão da taxa de compressão em função do tamanho do arquivo.}
-  \Description{Gráfico de regressão da taxa de compressão.}
-  \label{fig:reg_comp_rate}
+  \caption{Tempo de compressão por algoritmo em função do tamanho do arquivo.}
+  \Description{Gráfico mostrando tempo de compressão para cada algoritmo, com xz apresentando os maiores tempos e zstd os menores.}
+  \label{fig:comp_time}
+\end{figure}
+
+A Figura~\ref{fig:reg_comp_time} apresenta os mesmos dados com regressão linear e projeção para arquivos de até 35MB, permitindo estimar o comportamento para arquivos maiores.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image1}
+  \caption{Tempo de compressão com regressão linear (projeção 25M-35M).}
+  \Description{Gráfico de regressão linear do tempo de compressão com projeção para arquivos maiores.}
+  \label{fig:reg_comp_time}
+\end{figure}
+
+\subsubsection{Tempo de Descompressão}
+
+A Figura~\ref{fig:decomp_time} mostra o tempo de descompressão. Diferentemente da compressão, o \textbf{bzip2} apresenta os piores tempos de descompressão, chegando a 1,7s para arquivos de 25MB. Os demais algoritmos (gzip, xz e zstd) mantêm tempos de descompressão similares e baixos, com o zstd novamente liderando com tempos inferiores a 0,1s.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image11}
+  \caption{Tempo de descompressão por algoritmo em função do tamanho do arquivo.}
+  \Description{Gráfico mostrando tempo de descompressão, com bzip2 apresentando os maiores tempos.}
+  \label{fig:decomp_time}
+\end{figure}
+
+A Figura~\ref{fig:reg_decomp_time} apresenta os mesmos dados com regressão linear e projeção para arquivos maiores.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image7}
+  \caption{Tempo de descompressão com regressão linear (projeção 25M-35M).}
+  \Description{Gráfico de regressão linear do tempo de descompressão com projeção.}
+  \label{fig:reg_decomp_time}
+\end{figure}
+
+\subsubsection{Taxa de Compressão}
+
+A Figura~\ref{fig:comp_rate} apresenta a taxa de compressão (quanto maior, melhor). O \textbf{xz} atinge as melhores taxas, comprimindo até 90\% do arquivo original para tamanhos maiores. O \textbf{gzip} apresenta desempenho consistentemente inferior, mantendo-se em torno de 63\% de compressão independentemente do tamanho do arquivo.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image6}
+  \caption{Taxa de compressão por algoritmo em função do tamanho do arquivo.}
+  \Description{Gráfico mostrando taxa de compressão, com xz atingindo as melhores taxas e gzip as piores.}
+  \label{fig:comp_rate}
+\end{figure}
+
+A Figura~\ref{fig:reg_rate} apresenta a taxa de compressão com regressão SPLINE e projeção para arquivos maiores.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image4}
+  \caption{Taxa de compressão com regressão SPLINE (projeção 25M-35M).}
+  \Description{Gráfico de regressão da taxa de compressão com projeção.}
+  \label{fig:reg_rate}
+\end{figure}
+
+\subsubsection{Análise com Intervalo de Confiança}
+
+As Figuras~\ref{fig:ic_comp} e~\ref{fig:ic_comp2} apresentam os tempos de compressão com intervalo de confiança de 95\%, demonstrando a estabilidade das medições. As barras de erro são praticamente invisíveis, indicando alta reprodutibilidade dos experimentos.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/image8}
+  \caption{Intervalo de confiança (95\%) para tempo de compressão.}
+  \Description{Gráfico com barras de erro mostrando a estabilidade das medições de tempo de compressão.}
+  \label{fig:ic_comp}
 \end{figure}
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{figures/image10}
-  \caption{Análise adicional de desempenho.}
-  \Description{Gráfico adicional de análise de desempenho.}
-  \label{fig:additional1}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{figures/image11}
-  \caption{Comparação de métricas de hardware.}
-  \Description{Gráfico comparativo de métricas de hardware.}
-  \label{fig:additional2}
+  \caption{Tempo de compressão com médias e intervalo de confiança de 95\% (barras verticais).}
+  \Description{Gráfico com médias e barras de IC 95\% para tempo de compressão.}
+  \label{fig:ic_comp2}
 \end{figure}
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{figures/image12}
-  \caption{Análise consolidada dos resultados.}
-  \Description{Gráfico consolidado dos resultados finais.}
-  \label{fig:additional3}
+  \caption{Intervalo de confiança (95\%) para tempo de descompressão.}
+  \Description{Gráfico com barras de erro para tempo de descompressão.}
+  \label{fig:ic_decomp}
 \end{figure}
 
 %%
@@ -355,32 +397,84 @@ Para melhor compreensão do comportamento dos algoritmos com diferentes tamanhos
 %%
 \section{Discussão}
 
+\subsection{Resumo Comparativo dos Algoritmos}
+
+A Tabela~\ref{tab:classificacao} apresenta uma classificação qualitativa dos algoritmos nas principais métricas avaliadas.
+
+\begin{table}[h]
+  \centering
+  \caption{Classificação dos algoritmos por métrica de desempenho.}
+  \label{tab:classificacao}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Métrica} & \textbf{gzip} & \textbf{bzip2} & \textbf{xz} & \textbf{zstd} \\
+    \midrule
+    Velocidade de Compressão & Bom & Regular & Ruim & Excelente \\
+    Velocidade de Descompressão & Bom & Ruim & Bom & Excelente \\
+    Taxa de Compressão & Regular & Bom & Excelente & Bom \\
+    Uso de CPU & Baixo & Alto & Muito Alto & Muito Baixo \\
+    \midrule
+    \textbf{Avaliação Geral} & Bom & Regular & Especializado & Excelente \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+A Tabela~\ref{tab:valores} apresenta os valores médios obtidos para arquivos de 25MB, representando o comportamento típico em arquivos de tamanho moderado.
+
+\begin{table}[h]
+  \centering
+  \caption{Valores médios para arquivos de 25MB (3 execuções).}
+  \label{tab:valores}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Algoritmo} & \textbf{Compressão (s)} & \textbf{Descompressão (s)} & \textbf{Taxa (\%)} & \textbf{Tamanho Final} \\
+    \midrule
+    gzip & 2,79 & 0,25 & 37,34 & 9,3 MB \\
+    bzip2 & 3,33 & 1,68 & 21,52 & 5,4 MB \\
+    xz & 21,53 & 0,21 & 10,12 & 2,5 MB \\
+    zstd & 0,26 & 0,07 & 23,56 & 5,9 MB \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Análise dos Trade-offs}
+
 Os resultados obtidos confirmam os trade-offs conhecidos entre os algoritmos de compressão:
 
-\textbf{gzip} oferece o melhor equilíbrio entre velocidade e simplicidade, sendo ideal para cenários onde o tempo de processamento é crítico e a taxa de compressão moderada é aceitável.
+\textbf{gzip} oferece um equilíbrio razoável entre velocidade e simplicidade, sendo ideal para cenários onde compatibilidade é essencial. Entretanto, sua taxa de compressão é a mais baixa entre os algoritmos testados.
 
-\textbf{bzip2} apresenta melhor taxa de compressão que o gzip, mas com penalidade significativa no tempo de descompressão. É adequado para arquivamento de longo prazo onde a descompressão é infrequente.
+\textbf{bzip2} apresenta melhor taxa de compressão que o gzip, mas com penalidade significativa no tempo de descompressão (até 7x mais lento que gzip). É adequado para arquivamento de longo prazo onde a descompressão é infrequente.
 
-\textbf{xz} oferece as melhores taxas de compressão, mas com os maiores tempos de processamento. Recomendado para distribuição de software e arquivos que serão descomprimidos muitas vezes após uma única compressão.
+\textbf{xz} oferece as melhores taxas de compressão (redução de até 90\%), mas com os maiores tempos de processamento. Recomendado para distribuição de software e arquivos que serão descomprimidos muitas vezes após uma única compressão.
 
-\textbf{zstd} demonstra ser uma alternativa moderna e versátil, oferecendo velocidades comparáveis ao gzip com taxas de compressão próximas ao xz. É particularmente adequado para aplicações em tempo real e streaming de dados.
+\textbf{zstd} demonstra ser a alternativa mais moderna e versátil, oferecendo velocidades até 80x superiores ao xz com taxas de compressão competitivas. É particularmente adequado para aplicações em tempo real, backups incrementais e streaming de dados.
 
 %%
 %% 6. Conclusão
 %%
 \section{Conclusão}
 
-Este trabalho apresentou uma análise comparativa detalhada de quatro algoritmos de compressão de arquivos: gzip, bzip2, xz e zstd. Através de experimentos controlados em ambiente Docker, foram coletadas métricas de tempo de compressão, descompressão e taxa de compressão para arquivos de diferentes tamanhos.
+Este trabalho apresentou uma análise comparativa detalhada de quatro algoritmos de compressão de arquivos: gzip, bzip2, xz e zstd. Através de experimentos controlados em ambiente Docker, foram coletadas métricas de tempo de compressão, descompressão e taxa de compressão para arquivos de texto de 1MB a 25MB.
 
-Os resultados demonstram que não existe um algoritmo universalmente superior, mas sim diferentes trade-offs que devem ser considerados conforme o caso de uso específico:
+Os resultados demonstram que não existe um algoritmo universalmente superior, mas sim diferentes trade-offs que devem ser considerados conforme o caso de uso específico. Com base nos experimentos realizados, recomendamos:
 
 \begin{itemize}
-  \item Para velocidade máxima: gzip ou zstd
-  \item Para melhor compressão: xz
-  \item Para equilíbrio moderno: zstd
+  \item \textbf{Para velocidade máxima:} zstd --- até 80x mais rápido que xz na compressão e 24x mais rápido que bzip2 na descompressão.
+  \item \textbf{Para melhor taxa de compressão:} xz --- atinge taxas de até 90\%, reduzindo arquivos de 25MB para apenas 2,5MB.
+  \item \textbf{Para uso geral moderno:} zstd --- combina alta velocidade com boa taxa de compressão, sendo a escolha mais equilibrada.
+  \item \textbf{Para compatibilidade legada:} gzip --- amplamente suportado em todos os sistemas Unix-like.
+  \item \textbf{Evitar para descompressão frequente:} bzip2 --- seu tempo de descompressão é significativamente maior que os demais.
 \end{itemize}
 
-Como trabalhos futuros, sugerimos a análise com diferentes tipos de arquivos (binários, imagens, dados científicos).
+O algoritmo zstd destaca-se como a melhor escolha para a maioria dos cenários modernos, oferecendo o melhor equilíbrio entre velocidade e eficiência de compressão. O xz permanece relevante para casos onde o tamanho final é crítico e o tempo de compressão não é uma restrição.
+
+Como trabalhos futuros, sugerimos:
+\begin{itemize}
+  \item Análise com diferentes tipos de arquivos (binários, imagens, dados científicos)
+  \item Avaliação de diferentes níveis de compressão de cada algoritmo
+  \item Medição do consumo de memória durante a compressão
+  \item Análise de compressão paralela (multi-threaded)
+\end{itemize}
 
 %%
 %% Referências
