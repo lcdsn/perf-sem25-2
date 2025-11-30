@@ -183,7 +183,7 @@ O procedimento de benchmark segue os seguintes passos para cada tamanho de arqui
       \item Limpar cache novamente
       \item Executar descompressão com \texttt{perf stat}
       \item Salvar resultados em arquivo CSV
-      \item Aguardar 10 segundos (cooldown)
+      \item Aguardar 1 segundo (cooldown)
     \end{enumerate}
   \end{enumerate}
 \end{enumerate}
@@ -197,7 +197,7 @@ Os eventos de hardware coletados pelo perf incluem: task-clock, context-switches
 
   \item[Tempo de Descompressão] O tempo que cada ferramenta leva para descompactar o arquivo gerado.
 
-  \item[Taxa de Compressão] Calculada pela fórmula: $\frac{\text{Tamanho comprimido}}{\text{Tamanho original}} \times 100$. Valores menores indicam maior eficiência.
+  \item[Taxa de Compressão] Calculada pela fórmula: $100 \times \left(1 - \frac{\text{Tamanho comprimido}}{\text{Tamanho original}}\right)$. Valores maiores indicam maior eficiência.
 
   \item[Ciclos de CPU] Número total de ciclos de processador utilizados.
 
@@ -429,10 +429,10 @@ A Tabela~\ref{tab:valores} apresenta os valores médios e desvio padrão obtidos
     \toprule
     \textbf{Algoritmo} & \textbf{Compressão (ms)} & \textbf{Descompressão (ms)} & \textbf{Taxa (\%)} \\
     \midrule
-    gzip & 1448 $\pm$ 805 & 130 $\pm$ 73 & 37,35 $\pm$ 0,04 \\
-    bzip2 & 1734 $\pm$ 964 & 869 $\pm$ 487 & 21,68 $\pm$ 0,28 \\
-    xz & 10975 $\pm$ 6376 & 117 $\pm$ 57 & 11,88 $\pm$ 2,63 \\
-    zstd & 141 $\pm$ 74 & 39 $\pm$ 19 & 24,05 $\pm$ 1,15 \\
+    gzip & 1448 $\pm$ 805 & 130 $\pm$ 73 & 62,65 $\pm$ 0,04 \\
+    bzip2 & 1734 $\pm$ 964 & 869 $\pm$ 487 & 78,32 $\pm$ 0,28 \\
+    xz & 10975 $\pm$ 6376 & 117 $\pm$ 57 & 88,12 $\pm$ 2,63 \\
+    zstd & 141 $\pm$ 74 & 39 $\pm$ 19 & 75,95 $\pm$ 1,15 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -448,6 +448,18 @@ Os resultados obtidos confirmam os trade-offs conhecidos entre os algoritmos de 
 \textbf{xz} oferece as melhores taxas de compressão (redução de até 90\%), mas com os maiores tempos de processamento. Recomendado para distribuição de software e arquivos que serão descomprimidos muitas vezes após uma única compressão.
 
 \textbf{zstd} demonstra ser a alternativa mais moderna e versátil, oferecendo velocidades até 80x superiores ao xz com taxas de compressão competitivas. É particularmente adequado para aplicações em tempo real, backups incrementais e streaming de dados.
+
+\subsection{Análise das Regressões}
+
+As regressões foram aplicadas usando tamanhos de 25 MB a 35 MB, faixa em que todos os algoritmos se comportaram de forma estável e comparável. Nos gráficos de tempo de compressão e tempo de descompressão, as curvas crescem de forma praticamente proporcional ao tamanho do arquivo, o que caracteriza uma relação quase linear --- por isso a regressão linear foi a escolha adequada para estimar tendências. Já na taxa de compressão, o comportamento não é linear: os algoritmos apresentam crescimento rápido no início e depois estabilizam, formando uma curva suavizada. Por isso, utilizou-se uma regressão SPLINE, que se ajusta melhor a curvas não lineares e capta essa variação de forma mais realista.
+
+\subsection{Limitações do Estudo}
+
+O estudo apresenta resultados robustos, mas possui algumas limitações importantes. A geração de arquivos por Cadeias de Markov --- embora realista --- ainda representa apenas dados textuais, o que restringe a generalização dos resultados para outros tipos de arquivo, como binários, imagens ou logs altamente redundantes. Além disso, todos os experimentos foram executados em uma única configuração de hardware relativamente modesta, o que significa que o comportamento dos algoritmos pode variar em máquinas com mais núcleos, maior banda de memória ou diferentes tipos de armazenamento. Outro ponto é que, apesar da correção metodológica na Fase 3, o uso apenas de níveis padrão de compressão (e não níveis ajustados) pode não refletir o desempenho real em cenários de produção onde parâmetros finos são ajustados manualmente.
+
+\subsection{Recomendações e Implicações Práticas}
+
+Com base nos resultados, recomenda-se que ambientes que priorizam velocidade adotem o zstd, que se mostrou extremamente eficiente tanto para compressão quanto para descompressão, mantendo excelente custo-benefício computacional. Para cenários onde a eficiência máxima de compressão é o objetivo --- como backup de longo prazo ou transferência em redes de baixa largura de banda --- o xz continua sendo a escolha ideal, desde que o tempo adicional de processamento não seja um problema. Em aplicações críticas em leitura (como pipelines de dados), deve-se evitar o bzip2 devido ao alto custo de descompressão. Além disso, o uso de warm-cache (pré-carregamento) e a padronização dos dados de teste, como demonstrado na Fase 3, podem ser incorporados como boas práticas de benchmarking em empresas e laboratórios para garantir reprodutibilidade e comparabilidade entre algoritmos.
 
 %%
 %% 6. Conclusão

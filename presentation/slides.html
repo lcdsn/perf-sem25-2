@@ -273,7 +273,7 @@
 
       <div class="footer">
         <span>Soller & Nogueira — UFRGS</span>
-        <span>2 / 12</span>
+        <span>2 / 14</span>
       </div>
     </div>
 
@@ -333,7 +333,7 @@
 
       <div class="footer">
         <span>Soller & Nogueira — UFRGS</span>
-        <span>3 / 12</span>
+        <span>3 / 14</span>
       </div>
     </div>
 
@@ -350,7 +350,7 @@
 
       <div class="footer">
         <span>Soller & Nogueira — UFRGS</span>
-        <span>4 / 12</span>
+        <span>4 / 14</span>
       </div>
     </div>
 
@@ -367,7 +367,7 @@
 
       <div class="footer">
         <span>Soller & Nogueira — UFRGS</span>
-        <span>5 / 12</span>
+        <span>5 / 14</span>
       </div>
     </div>
 
@@ -384,13 +384,57 @@
 
       <div class="footer">
         <span>Soller & Nogueira — UFRGS</span>
-        <span>6 / 12</span>
+        <span>6 / 14</span>
       </div>
     </div>
 
-    <!-- Slide 7: Resultados Fase 3 - Tempo de Compressão -->
+    <!-- Slide 7: Procedimento Experimental -->
     <div class="slide slide-content">
-      <h2>4. Resultados — Fase 3: Tempo de Compressão</h2>
+      <h2>4. Procedimento Experimental</h2>
+
+      <p style="margin-bottom: 15px">
+        O procedimento de benchmark segue os seguintes passos para cada tamanho
+        de arquivo:
+      </p>
+
+      <ol style="font-size: 0.95em; line-height: 1.8">
+        <li>
+          <strong>Geração do arquivo de teste:</strong> Um arquivo de texto é
+          gerado utilizando o gerador de Cadeias de Markov com o tamanho
+          especificado.
+        </li>
+        <li>
+          <strong>Para cada algoritmo</strong> (gzip, bzip2, xz, zstd):
+          <ol type="a" style="margin-top: 8px">
+            <li>
+              Para cada repetição (3 execuções):
+              <ol type="i" style="margin-top: 5px; font-size: 0.9em">
+                <li>
+                  Limpar cache:
+                  <code>sync && echo 3 > /proc/sys/vm/drop_caches</code>
+                </li>
+                <li>Iniciar monitoramento com vmstat e iostat</li>
+                <li>Executar compressão com <code>perf stat</code></li>
+                <li>Medir tamanho do arquivo comprimido</li>
+                <li>Limpar cache novamente</li>
+                <li>Executar descompressão com <code>perf stat</code></li>
+                <li>Salvar resultados em arquivo CSV</li>
+                <li>Aguardar 1 segundo (cooldown)</li>
+              </ol>
+            </li>
+          </ol>
+        </li>
+      </ol>
+
+      <div class="footer">
+        <span>Soller & Nogueira — UFRGS</span>
+        <span>7 / 14</span>
+      </div>
+    </div>
+
+    <!-- Slide 8: Resultados Fase 3 - Tempo de Compressão -->
+    <div class="slide slide-content">
+      <h2>5. Resultados — Fase 3: Tempo de Compressão</h2>
 
       <figure class="large">
         <img src="../report/figures/image1.png" alt="Tempo de Compressão" />
@@ -402,13 +446,13 @@
 
       <div class="footer">
         <span>Soller & Nogueira — UFRGS</span>
-        <span>7 / 12</span>
+        <span>8 / 14</span>
       </div>
     </div>
 
-    <!-- Slide 8: Resultados Fase 3 - Tempo de Descompressão -->
+    <!-- Slide 9: Resultados Fase 3 - Tempo de Descompressão -->
     <div class="slide slide-content">
-      <h2>4. Resultados — Fase 3: Tempo de Descompressão</h2>
+      <h2>5. Resultados — Fase 3: Tempo de Descompressão</h2>
 
       <figure class="large">
         <img src="../report/figures/image7.png" alt="Tempo de Descompressão" />
@@ -420,11 +464,11 @@
 
       <div class="footer">
         <span>Soller & Nogueira — UFRGS</span>
-        <span>8 / 12</span>
+        <span>9 / 14</span>
       </div>
     </div>
 
-    <!-- Slide 9: Resultados Fase 3 - Taxa -->
+    <!-- Slide 10: Resultados Fase 3 - Taxa -->
     <div class="slide slide-content">
       <h2>5. Resultados — Fase 3: Taxa de Compressão</h2>
 
@@ -484,13 +528,38 @@
 
       <div class="footer">
         <span>Soller & Nogueira — UFRGS</span>
-        <span>9 / 12</span>
+        <span>10 / 14</span>
       </div>
     </div>
 
-    <!-- Slide 10: Conclusão -->
+    <!-- Slide 11: Limitações -->
     <div class="slide slide-content">
-      <h2>6. Conclusão</h2>
+      <h2>6. Limitações do Estudo</h2>
+
+      <ul style="font-size: 1.1em; line-height: 2">
+        <li>
+          Apenas <strong>dados textuais</strong> (Cadeias de Markov) — não
+          generaliza para binários, imagens ou logs
+        </li>
+        <li>
+          <strong>Hardware modesto</strong> (i3, 4GB RAM) — comportamento pode
+          variar em outras configurações
+        </li>
+        <li>
+          Uso apenas de <strong>níveis padrão</strong> de compressão — não
+          reflete cenários com parâmetros ajustados
+        </li>
+      </ul>
+
+      <div class="footer">
+        <span>Soller & Nogueira — UFRGS</span>
+        <span>11 / 14</span>
+      </div>
+    </div>
+
+    <!-- Slide 12: Conclusão -->
+    <div class="slide slide-content">
+      <h2>7. Conclusão</h2>
 
       <table style="font-size: 0.9em; margin-bottom: 25px">
         <caption>
@@ -524,13 +593,6 @@
           <td><strong>Excelente</strong></td>
           <td>Bom</td>
         </tr>
-        <tr>
-          <td style="text-align: left"><strong>Avaliação Geral</strong></td>
-          <td>Bom</td>
-          <td>Regular</td>
-          <td>Especializado</td>
-          <td><strong>Excelente</strong></td>
-        </tr>
       </table>
 
       <h3>Recomendações</h3>
@@ -538,10 +600,10 @@
         <ul>
           <li><strong>Velocidade máxima:</strong> zstd</li>
           <li><strong>Melhor compressão:</strong> xz</li>
-          <li><strong>Uso geral moderno:</strong> zstd</li>
+          <li><strong>Uso geral:</strong> zstd</li>
         </ul>
         <ul>
-          <li><strong>Compatibilidade legada:</strong> gzip</li>
+          <li><strong>Compatibilidade:</strong> gzip</li>
           <li><strong>Evitar para uso frequente:</strong> bzip2</li>
         </ul>
       </div>
@@ -561,11 +623,11 @@
 
       <div class="footer">
         <span>Soller & Nogueira — UFRGS</span>
-        <span>10 / 12</span>
+        <span>12 / 14</span>
       </div>
     </div>
 
-    <!-- Slide 11: Referências -->
+    <!-- Slide 13: Referências -->
     <div class="slide slide-content">
       <h2>Referências</h2>
 
@@ -599,11 +661,11 @@
 
       <div class="footer">
         <span>Soller & Nogueira — UFRGS</span>
-        <span>11 / 12</span>
+        <span>13 / 14</span>
       </div>
     </div>
 
-    <!-- Slide 12: Final -->
+    <!-- Slide 14: Final -->
     <div class="slide slide-content">
       <div style="margin-top: 60px; text-align: center">
         <p style="font-size: 1.3em"><strong>Obrigado!</strong></p>
@@ -612,7 +674,7 @@
 
       <div class="footer">
         <span>Soller & Nogueira — UFRGS</span>
-        <span>12 / 12</span>
+        <span>14 / 14</span>
       </div>
     </div>
   </body>
