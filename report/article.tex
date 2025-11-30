@@ -206,6 +206,25 @@ Os eventos de hardware coletados pelo perf incluem: task-clock, context-switches
   \item[Branch Misses] Número de predições de branch incorretas, indicando a complexidade do fluxo de controle do algoritmo.
 \end{description}
 
+\subsection{Reprodução dos Experimentos}
+
+O projeto contém dois experimentos distintos:
+
+\textbf{Fase 2:} Para reproduzir os experimentos da Fase 2, execute na raiz do projeto:
+
+\begin{verbatim}
+  ./run_experiments.sh
+\end{verbatim}
+
+\textbf{Fase 3:} Para reproduzir os experimentos da Fase 3, execute no diretório \texttt{phase3/}:
+
+\begin{verbatim}
+  cd phase3
+  ./run_experiments.sh
+\end{verbatim}
+
+Ambos os scripts irão construir a imagem Docker, executar o container com as permissões necessárias, gerar os arquivos de teste, executar os algoritmos de compressão e salvar os resultados em arquivos CSV no diretório \texttt{output/}.
+
 %%
 %% 4. Resultados
 %%
