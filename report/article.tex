@@ -419,20 +419,20 @@ A Tabela~\ref{tab:classificacao} apresenta uma classificação qualitativa dos a
   \end{tabular}
 \end{table}
 
-A Tabela~\ref{tab:valores} apresenta os valores médios obtidos para arquivos de 25MB, representando o comportamento típico em arquivos de tamanho moderado.
+A Tabela~\ref{tab:valores} apresenta os valores médios e desvio padrão obtidos considerando todos os tamanhos de arquivo (1MB a 25MB), totalizando 75 amostras por algoritmo.
 
 \begin{table}[h]
   \centering
-  \caption{Valores médios para arquivos de 25MB (3 execuções).}
+  \caption{Valores médios e desvio padrão para arquivos de 1--25MB (75 amostras por algoritmo).}
   \label{tab:valores}
-  \begin{tabular}{lcccc}
+  \begin{tabular}{lccc}
     \toprule
-    \textbf{Algoritmo} & \textbf{Compressão (s)} & \textbf{Descompressão (s)} & \textbf{Taxa (\%)} & \textbf{Tamanho Final} \\
+    \textbf{Algoritmo} & \textbf{Compressão (ms)} & \textbf{Descompressão (ms)} & \textbf{Taxa (\%)} \\
     \midrule
-    gzip & 2,79 & 0,25 & 37,34 & 9,3 MB \\
-    bzip2 & 3,33 & 1,68 & 21,52 & 5,4 MB \\
-    xz & 21,53 & 0,21 & 10,12 & 2,5 MB \\
-    zstd & 0,26 & 0,07 & 23,56 & 5,9 MB \\
+    gzip & 1448 $\pm$ 805 & 130 $\pm$ 73 & 37,35 $\pm$ 0,04 \\
+    bzip2 & 1734 $\pm$ 964 & 869 $\pm$ 487 & 21,68 $\pm$ 0,28 \\
+    xz & 10975 $\pm$ 6376 & 117 $\pm$ 57 & 11,88 $\pm$ 2,63 \\
+    zstd & 141 $\pm$ 74 & 39 $\pm$ 19 & 24,05 $\pm$ 1,15 \\
     \bottomrule
   \end{tabular}
 \end{table}

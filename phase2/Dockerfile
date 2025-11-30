@@ -9,7 +9,7 @@ RUN apt-get update \
      sysstat=12.6.1-1 \
      procps=2:4.0.2-3 \
      coreutils=9.1-1 \
-     linux-perf=6.1.153-1 \
+     linux-perf=6.1.158-1 \
      g++=4:12.2.0-3 \
   && rm -rf /var/lib/apt/lists/*
 
